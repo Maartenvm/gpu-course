@@ -75,7 +75,7 @@ __global__ void reduce_kernel(float *out_array, float *in_array, int n) {
         //do this iteratively such that together the threads compute the
         //sum of all thread-local sums 
 
-        float temp =0f;
+        float temp = 0.0f;
         if ((ti + s) < block_size_x) {
            temp += sh_mem[ti+s];
         }
