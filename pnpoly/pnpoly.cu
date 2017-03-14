@@ -32,8 +32,8 @@ __global__ void cn_pnpoly(int *bitmap, float2 *points, float2 *vertices, int n) 
         int k = VERTICES-1;
 
         for (int j=0; j<VERTICES; k = j++) {    // edge from vk to vj
-            float2 vj = vertices[j]; 
-            float2 vk = vertices[k]; 
+            float2 vj = constvertices[j]; 
+            float2 vk = constvertices[k]; 
 
             float slope = (vk.x-vj.x) / (vk.y-vj.y);
 
