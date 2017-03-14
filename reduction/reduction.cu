@@ -75,7 +75,9 @@ __global__ void reduce_kernel(float *out_array, float *in_array, int n) {
         //do this iteratively such that together the threads compute the
         //sum of all thread-local sums 
 
-        sh_mem[ti] += sh_mem[ti+s];
+        if (ti+s < n) {
+            sh_mem[ti] += sh_mem[ti+s];
+        }
 
         //use shared memory to access the values of other threads
         //and store the new value in shared memory to be used in the next round
