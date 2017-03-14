@@ -21,6 +21,7 @@ extern "C" {
  *
  * Author: Ben van Werkhoven <b.vanwerkhoven@esciencecenter.nl>
  */
+__constant__ float2 constvertices[VERTICES];
 __global__ void cn_pnpoly(int *bitmap, float2 *points, float2 *vertices, int n) {
     int i = blockIdx.x * blockDim.x + threadIdx.x;
 
@@ -95,15 +96,22 @@ int main() {
     fread(h_vertices, sizeof(float), 2*VERTICES, file);
 
     // allocate device memory for storing the vertices
+
     err = cudaMalloc((void **)&d_vertices, VERTICES*sizeof(float2));
     if (err != cudaSuccess) {
         fprintf(stderr, "Error in cudaMalloc: %s\n", cudaGetErrorString( err ));
     }
 
-    // transfer vertices to d_vertices
+    // transfer vertices to d_vertices        
     err = cudaMemcpy(d_vertices, h_vertices, VERTICES*sizeof(float2), cudaMemcpyHostToDevice);
     if (err != cudaSuccess) {
         fprintf(stderr, "Error in cudaMemcpy: %s\n", cudaGetErrorString(err));
+    }
+
+    // My code
+    err = cudaMemcpyToSymbol ( constvertices, h_vertices, VERTICES*sizeof(float2),  0, cudaMemcpyHostToDevice );
+    if (err != cudaSuccess) {
+        fprintf(stderr, "Error in cudaMemcpyToSymbol: %s\n", cudaGetErrorString(err));
     }
 
     // create CUDA streams and events
