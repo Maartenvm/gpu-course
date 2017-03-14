@@ -34,7 +34,6 @@ float sum_floats_kahan(float *in_array, int n) {
 
 //CUDA kernel for parallel reduction
 __global__ void reduce_kernel(float *out_array, float *in_array, int n) {
-
     int ti = threadIdx.x;
     int x = blockIdx.x * block_size_x + threadIdx.x;
     int step_size = gridDim.x * block_size_x;
@@ -52,10 +51,12 @@ __global__ void reduce_kernel(float *out_array, float *in_array, int n) {
     //value per thread block for this we will need shared memory
 
     //declare shared memory array, how much shared memory do we need?
-    //__shared__ float ...;
+    __shared__ float sh_mem[block_size_x];
 
     //make every thread store its thread-local sum to the array in shared memory
-    //... = sum;
+    if (x < n) {
+        sh_mem[ti] = sum;
+    }
     
     //now let's call syncthreads() to make sure all threads have finished
     //storing their local sums to shared memory
@@ -74,16 +75,19 @@ __global__ void reduce_kernel(float *out_array, float *in_array, int n) {
         //do this iteratively such that together the threads compute the
         //sum of all thread-local sums 
 
+        sh_mem[ti] += sh_mem[ti+s];
+
         //use shared memory to access the values of other threads
         //and store the new value in shared memory to be used in the next round
         //be careful that values that should be read are
         //not overwritten before they are read
         //make sure to call __syncthreads() when needed
     }
+    __syncthreads();
 
     //write back one value per thread block
     if (ti == 0) {
-        //out_array[blockIdx.x] = ;  //store the per-thread block reduced value to global memory
+        out_array[blockIdx.x] = sh_mem[ti]; //store the per-thread block reduced value to global memory
     }
 }
 
