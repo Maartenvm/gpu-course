@@ -54,9 +54,9 @@ __global__ void reduce_kernel(float *out_array, float *in_array, int n) {
     __shared__ float sh_mem[block_size_x];
 
     //make every thread store its thread-local sum to the array in shared memory
-    if (x < n) {
+    // if (x < n) {
         sh_mem[ti] = sum;
-    }
+    // }
     
     //now let's call syncthreads() to make sure all threads have finished
     //storing their local sums to shared memory
